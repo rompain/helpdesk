@@ -10,12 +10,16 @@ module Helpdesk
 
   mattr_accessor :issue_types
   
+  mattr_accessor :mail_server
+  
   def self.setup
     yield self
   end
 
   def self.user_class
-    @@user_class.constantize
+    if @@user_class.is_a?(String)
+      @@user_class.constantize
+    end
   end
 
 end
