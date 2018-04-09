@@ -2,6 +2,12 @@ require 'rails'
 require 'simple_form'
 require 'state_machine'
 require 'bootstrap-sass'
+require 'rails_autolink'
+require 'simple_form'
+require 'globalize3'
+require 'batch_translations'
+require 'ckeditor'
+require 'chosen-rails'
 
 module Helpdesk
   class Engine < ::Rails::Engine

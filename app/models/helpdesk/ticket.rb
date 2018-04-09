@@ -3,8 +3,8 @@ module Helpdesk
 
     STATUSES = [
       [ :new,        'Nowe:', 'label-important',3],
-      [ :open,        'Otworzone:', 'label-warning',2],
-      [ :waiting,     'Otworzone: oczekujące', 'label-info',2],
+      [ :open,        'Otwarte:', 'label-warning',2],
+      [ :waiting,     'Otwarte: oczekujące', 'label-info',2],
       [ :solved,      'Zamknięte: problem rozwiązany','label-success',0],
       [ :not_fixable, 'Zamknięte: nienaprawialne','label-inverse',-1],
       [ :unreachable, 'Zamknięte: klient nieosiągalny','label-inverse',-1],
@@ -20,10 +20,12 @@ module Helpdesk
     attr_accessible :requester_id, :assignee_id, :status, :comments_attributes,:ticket_type_id
 
 
+
+
     belongs_to :requester, :class_name => Helpdesk.user_class.to_s
     belongs_to :assignee, :class_name => Helpdesk.user_class.to_s
     belongs_to :ticket_type, :class_name => Helpdesk::TicketType
-    has_many :comments, :order => "created_at DESC"
+    has_many :comments, :order => "created_at DESC",:dependent => :destroy
 
 
 
@@ -38,11 +40,18 @@ module Helpdesk
 
     validates_presence_of :description,:requester_id,:ticket_type_id
 
-    accepts_nested_attributes_for :comments
+    accepts_nested_attributes_for :comments,:reject_if => lambda { |a| a[:comment].blank? }
 
 
     before_create :set_subject
+    before_create :set_status
     after_create  :send_email
+
+    def set_status
+      if self.status.blank?
+        self.status = :new
+      end
+    end
 
     def set_subject
       if self.created_at.nil?
