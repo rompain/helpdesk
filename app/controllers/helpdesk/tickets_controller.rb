@@ -1,14 +1,15 @@
 module Helpdesk
   class TicketsController < Helpdesk::ApplicationController
+
+    helper TicketsHelper
+
     # GET /tickets
     # GET /tickets.json
     def index
       if params[:tickets] == 'closed'
-        @tickets = Helpdesk::Ticket.where(:requester_id => helpdesk_user.id).closed
-        @tickets_count = Helpdesk::Ticket.where(:requester_id => helpdesk_user.id).active.count
+        @tickets = Helpdesk::Ticket.where(:requester_id => helpdesk_user.id).closed.page(params[:page])
       else
-        @tickets = Helpdesk::Ticket.where(:requester_id => helpdesk_user.id).active
-        @tickets_count = @tickets.size
+        @tickets = Helpdesk::Ticket.where(:requester_id => helpdesk_user.id).active.page(params[:page])
       end
 
 
@@ -43,15 +44,8 @@ module Helpdesk
       end
     end
 
-    # GET /tickets/1/edit
-    def edit
-      @ticket = Helpdesk::Ticket.find(params[:id])
-    end
-
-    # POST /tickets
-    # POST /tickets.json
     def create
-      @ticket = Helpdesk::Ticket.new(params[:ticket])
+      @ticket = Helpdesk::Ticket.new(ticket_params)
       @ticket.requester = helpdesk_user
       @ticket.status = Helpdesk::Ticket::STATUSES[0][0]
 
@@ -72,14 +66,21 @@ module Helpdesk
       @ticket = Helpdesk::Ticket.find(params[:id])
 
       respond_to do |format|
-        if @ticket.update_attributes(params[:ticket])
-          format.html { redirect_to @ticket, notice: 'Ticket was successfully updated.' }
+        if @ticket.update_attributes(ticket_params)
+          format.html { redirect_to @ticket, notice: 'Ticket was successfully updated.'}
           format.json { head :no_content }
         else
           format.html { render action: "edit" }
           format.json { render json: @ticket.errors, status: :unprocessable_entity }
         end
       end
+    end
+
+
+    private
+
+    def ticket_params
+      params.require(:ticket).permit( :ticket_type_id, :subject, :description,comments_attributes:[:author_id, :comment, :public])
     end
 
   end

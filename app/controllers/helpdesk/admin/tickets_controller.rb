@@ -1,18 +1,22 @@
 class Helpdesk::Admin::TicketsController < Helpdesk::Admin::BaseController
 
   def index
-    if params[:tickets] == 'unassigned'
-      @tickets = Helpdesk::Ticket.unassigned.scoped
-    elsif params[:tickets] == 'closed'
-      @tickets = Helpdesk::Ticket.closed.scoped
-    elsif params[:tickets] == 'active'
-      @tickets = Helpdesk::Ticket.active.scoped
-    elsif params[:tickets] == 'all'
-      @tickets = Helpdesk::Ticket.all.scoped
+    case params[:tickets]
+    when 'unassigned'
+      @tickets = Helpdesk::Ticket.unassigned
+    when'closed'
+      @tickets = Helpdesk::Ticket.closed
+    when 'active'
+      @tickets = Helpdesk::Ticket.active
+    when 'all'
+      @tickets = Helpdesk::Ticket
     else
-      @tickets = my_tickets.active.scoped
+      @tickets = my_tickets.active
     end
-    @tickets = @tickets.page(params[:page])
+    @tickets = @tickets.includes(:requester)
+    .includes(:assignee)
+    .includes(:ticket_type)
+    .page(params[:page])
 
     render 'list'
   end
@@ -43,7 +47,7 @@ class Helpdesk::Admin::TicketsController < Helpdesk::Admin::BaseController
   end
 
   def create
-    @ticket = Helpdesk::Ticket.new(params[:ticket])
+    @ticket = Helpdesk::Ticket.new(ticket_params)
     if @ticket.save
       redirect_to admin_ticket_path(@ticket)
     else
@@ -53,7 +57,7 @@ class Helpdesk::Admin::TicketsController < Helpdesk::Admin::BaseController
 
   def update
     @ticket = Helpdesk::Ticket.find(params[:id])
-    if @ticket.update_attributes(params[:ticket])
+    if @ticket.update_attributes(ticket_params)
       unless @ticket.assignee
         @ticket.update_column(:assignee_id, helpdesk_user)
       end
@@ -61,6 +65,13 @@ class Helpdesk::Admin::TicketsController < Helpdesk::Admin::BaseController
     else
       render action: "new"
     end
+  end
+
+
+  private
+
+  def ticket_params
+    params.require(:ticket).permit(:status,:requester_id,:assignee_id,:ticket_type_id, :subject, :description,comments_attributes:[:author_id, :comment, :public])
   end
 
 end

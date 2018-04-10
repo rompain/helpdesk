@@ -1,0 +1,8 @@
+/*
+ *= require helpdesk/admin/bootstrap_overrides
+ *= require select2
+ *= require helpdesk/admin/tickets
+ *= require_self
+*/
+@import "bootstrap-sprockets";
+@import "bootstrap";

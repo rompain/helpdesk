@@ -14,12 +14,12 @@ module Helpdesk
 
         def authenticate_helpdesk_admin
           unless helpdesk_admin?
-            redirect_to main_app.root_url
+            redirect_to main_app.root_url, notice:'You have no power here!'
           end
         end
 
         def my_tickets
-          @my_tickets = Ticket
+          @my_tickets = Helpdesk::Ticket
           .includes(:comments=>[:author])
           .includes(:requester)
           .includes(:assignee)

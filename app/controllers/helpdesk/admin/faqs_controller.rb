@@ -2,19 +2,30 @@ class Helpdesk::Admin::FaqsController < Helpdesk::Admin::BaseController
 
   def sort
     params[:faqs].each_with_index do |id, index|
-      Helpdesk::Faq.update_all(['position=?', index+1], ['id=?', id])
+      Helpdesk::Faq.find(id).update_column(:position, index+1)
     end
     render :nothing => true
   end
+
+  def sorting
+    if params[:id]=='all'
+
+      @faqs = Helpdesk::Faq.roots
+    else
+      @faq = Helpdesk::Faq.find(params[:id])
+      @faqs = @faq.children
+    end
+  end
+
   # GET /faqs
   # GET /faqs.json
   def index
     if params[:faqs] == 'active'
-      @faqs = Helpdesk::Faq.active
+      @faqs = Helpdesk::Faq.roots.active
     elsif params[:faqs] == 'inactive'
-      @faqs = Helpdesk::Faq.inactive
+      @faqs = Helpdesk::Faq.roots.inactive
     else
-      @faqs = Helpdesk::Faq.all
+      @faqs = Helpdesk::Faq.roots
     end
     respond_to do |format|
       format.html # index.html.erb
@@ -52,7 +63,7 @@ class Helpdesk::Admin::FaqsController < Helpdesk::Admin::BaseController
   # POST /faqs
   # POST /faqs.json
   def create
-    @faq = Helpdesk::Faq.new(params[:faq])
+    @faq = Helpdesk::Faq.new(faq_params)
 
     respond_to do |format|
       if @faq.save
@@ -71,7 +82,7 @@ class Helpdesk::Admin::FaqsController < Helpdesk::Admin::BaseController
     @faq = Helpdesk::Faq.find(params[:id])
 
     respond_to do |format|
-      if @faq.update_attributes(params[:faq])
+      if @faq.update_attributes(faq_params)
         format.html { redirect_to admin_faqs_url, notice: 'Faq was successfully updated.' }
         format.json { head :no_content }
       else
@@ -91,5 +102,10 @@ class Helpdesk::Admin::FaqsController < Helpdesk::Admin::BaseController
       format.html { redirect_to admin_faqs_url }
       format.json { head :no_content }
     end
+  end
+
+  private
+  def faq_params
+    params.require(:faq).permit(:active, :position, :title, :text,:parent_id, translations_attributes:[:id,:locale,:title,:text])
   end
 end

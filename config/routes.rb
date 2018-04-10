@@ -1,6 +1,8 @@
 Helpdesk::Engine.routes.draw do
-# Rails.application.routes.draw do
-  scope "(:locale)", :locale => /pl|en/ do
+  require 'route_constraints_faqs'
+  require 'route_constraints_tickets'
+  # Rails.application.routes.draw do
+  scope "(:locale)", :locale => /pl|pt|en/ do
     # Admin only roots
     namespace :admin do
       resources :tickets do
@@ -9,14 +11,20 @@ Helpdesk::Engine.routes.draw do
       resources :ticket_types
       resources :faqs do
         post :sort, on: :collection
+        get :sorting, on: :member
       end
       resources :subscribers
-      root :to => "dashboard#index"
+      root :to => 'tickets#index'
     end
 
-    resources :faqs, :only => [ :index ]
+    resources :subscribers, :only => [:index, :create, :destroy]
+    resources :faqs, :only => [ :index, :show ] do
+      get :search, on: :collection
+    end
     resources :tickets, :except => [ :edit, :destroy ]
-    root :to => "tickets#index"
+
+
+    root :to => 'rooter#index'
 
   end
 end

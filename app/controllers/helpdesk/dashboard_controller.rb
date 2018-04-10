@@ -1,5 +1,5 @@
 module Helpdesk
-  class DashboardController < ApplicationController
+  class DashboardController < Helpdesk::ApplicationController
 
 
     before_filter :my_tickets
@@ -13,7 +13,7 @@ module Helpdesk
 
 
     def my_tickets
-      @my_tickets = Ticket
+      @my_tickets = Helpdesk::Ticket
       .includes(:comments=>[:author])
       .includes(:requester)
       .includes(:assignee)

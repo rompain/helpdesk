@@ -4,10 +4,13 @@ require 'state_machine'
 require 'bootstrap-sass'
 require 'rails_autolink'
 require 'simple_form'
-require 'globalize3'
+require 'globalize'
 require 'batch_translations'
 require 'ckeditor'
-require 'chosen-rails'
+require 'select2-rails'
+require 'kaminari'
+require 'jquery-ui-rails'
+require 'acts_as_ordered_tree'
 
 module Helpdesk
   class Engine < ::Rails::Engine

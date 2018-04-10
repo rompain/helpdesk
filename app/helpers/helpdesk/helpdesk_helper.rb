@@ -1,15 +1,21 @@
 module Helpdesk
   module HelpdeskHelper
-    def menu_left(title,&block)
-      content_tag(:fieldset) do
-        content_tag(:legend ,title) +
-        content_tag( :ul, class: 'nav nav-list') do
-          capture(&block)
 
+
+    def menu_left(title,&block)
+      panel_menu(title,'default',&block)
+    end
+
+    def panel_menu(title,type,&block)
+      content_tag(:div,class: "panel panel-#{type}") do
+        content_tag(:div ,class: 'panel-heading') do
+          content_tag(:h3 ,title,class:'panel-title')
+        end +
+        content_tag( :ul, class: 'nav nav-pills nav-stacked ') do
+          capture(&block)
         end
       end
     end
-
 
     def menu_li(lbl, path, *args)
       options = args.extract_options!
@@ -23,8 +29,12 @@ module Helpdesk
       end
     end
 
-    def ico(name,color='black')
-      raw("<i class=\"icon-#{name} icon-#{color}\"></i> ")
+    def badge(num,css='pull-right')
+      raw("<span class=\"badge #{css}\">#{num}</span> ")
+    end
+
+    def ico(name)
+      raw("<i class=\"glyphicon glyphicon-#{name}\"></i> ")
     end
 
     def parent_layout(layout)
